@@ -1,0 +1,9 @@
+package com.milk.milkanalysis.repository;
+
+import com.milk.milkanalysis.model.Expense;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import java.util.List;
+
+public interface ExpenseRepository extends MongoRepository<Expense, String> {
+    List<Expense> findByUserId(String userId);
+}

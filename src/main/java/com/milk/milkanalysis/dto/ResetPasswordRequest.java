@@ -1,0 +1,9 @@
+package com.milk.milkanalysis.dto;
+
+import lombok.Data;
+
+@Data
+public class ResetPasswordRequest {
+    private String otp;
+    private String newPassword;
+}
