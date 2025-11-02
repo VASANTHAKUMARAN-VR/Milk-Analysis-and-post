@@ -19,5 +19,5 @@ COPY src ./src
 # Application build pannu
 RUN ./mvnw clean package -DskipTests
 
-# Run the application
-CMD ["java", "-jar", "target/milkanalysis-0.0.1-SNAPSHOT.jar"]
+# Run the application - CORRECT JAR NAME
+CMD ["java", "-jar", "target/Milk-Analysis-and-post-0.0.1-SNAPSHOT.jar"]
