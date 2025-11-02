@@ -7,6 +7,9 @@ COPY .mvn/ .mvn
 COPY mvnw .
 COPY pom.xml .
 
+# 👇 Maven Wrapper executable ah maaru
+RUN chmod +x mvnw
+
 # Dependencies download pannu
 RUN ./mvnw dependency:go-offline
 
