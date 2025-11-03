@@ -5,6 +5,7 @@ import com.milk.milkanalysis.model.PostCategory;
 import com.milk.milkanalysis.service.SaleRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sale-records")
+@CrossOrigin(origins = "*") // ✅ Allow frontend access
 public class SaleRecordController {
 
     @Autowired
@@ -46,21 +48,28 @@ public class SaleRecordController {
         return ResponseEntity.ok(service.getSalesByDate(LocalDate.parse(date)));
     }
 
-    // ✏️ Update Sale
-    @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateSale(@PathVariable String id, @RequestBody SaleRecord updated) {
+    // ✏️ Update Sale (✅ now matches Service)
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateSale(
+            @PathVariable String id,
+            @RequestBody SaleRecord updated) {
+
         var result = service.updateSale(id, updated);
-        if (result.isEmpty())
-            return ResponseEntity.status(404).body("Sale not found");
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Sale not found");
+        }
         return ResponseEntity.ok(result.get());
     }
 
-    // ❌ Delete Sale
+    // ❌ Delete Sale (✅ now matches Service)
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteSale(@PathVariable String id) {
         boolean deleted = service.deleteSale(id);
-        if (!deleted)
-            return ResponseEntity.status(404).body("Sale not found");
+        if (!deleted) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Sale not found");
+        }
         return ResponseEntity.ok("Sale deleted successfully");
     }
 }

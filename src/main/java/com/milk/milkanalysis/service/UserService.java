@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -29,13 +30,12 @@ public class UserService {
     }
 
     public User enableUser(String email) {
-        var userOpt = userRepository.findByEmail(email);
-        if (userOpt.isPresent()) {
-            User u = userOpt.get();
-            u.setEnabled(true);
-            return userRepository.save(u);
-        }
-        return null;
+        return userRepository.findByEmail(email)
+                .map(u -> {
+                    u.setEnabled(true);
+                    return userRepository.save(u);
+                })
+                .orElse(null);
     }
 
     public boolean existsByEmail(String email) {
@@ -47,26 +47,22 @@ public class UserService {
     }
 
     public User findByEmailOrMobile(String identifier) {
-        var opt = userRepository.findByEmailOrMobileNumber(identifier, identifier);
-        return opt.orElse(null);
+        return userRepository.findByEmailOrMobileNumber(identifier, identifier).orElse(null);
     }
 
     public void updatePassword(String email, String newPassword) {
-        var opt = userRepository.findByEmail(email);
-        if (opt.isPresent()) {
-            User u = opt.get();
+        userRepository.findByEmail(email).ifPresent(u -> {
             u.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(u);
-        }
+        });
     }
 
     public boolean deleteUserByEmailOrMobile(String identifier) {
-        var userOpt = userRepository.findByEmailOrMobileNumber(identifier, identifier);
-        if (userOpt.isPresent()) {
-            userRepository.delete(userOpt.get());
-            return true;
-        }
-        return false;
+        return userRepository.findByEmailOrMobileNumber(identifier, identifier)
+                .map(u -> {
+                    userRepository.delete(u);
+                    return true;
+                })
+                .orElse(false);
     }
-
 }

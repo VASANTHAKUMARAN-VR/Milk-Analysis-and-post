@@ -5,6 +5,7 @@ import com.milk.milkanalysis.model.PostCategory;
 import com.milk.milkanalysis.repository.SaleRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -41,8 +42,15 @@ public class SaleRecordService {
         Optional<SaleRecord> existing = repo.findById(id);
         if (existing.isPresent()) {
             SaleRecord record = existing.get();
-            record.setCategory(updated.getCategory());
-            record.setPrice(updated.getPrice());
+
+            if (updated.getCategory() != null) {
+                record.setCategory(updated.getCategory());
+            }
+
+            if (updated.getPrice() != 0) { // ✅ fixed null-safe double check
+                record.setPrice(updated.getPrice());
+            }
+
             record.setDate(LocalDate.now());
             return Optional.of(repo.save(record));
         }

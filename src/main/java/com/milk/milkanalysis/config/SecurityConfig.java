@@ -29,19 +29,26 @@ public class SecurityConfig {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * ✅ Custom UserDetailsService that allows login using either email or mobile number.
+     */
     @Bean
     public UserDetailsService userDetailsService() {
         return usernameOrMobile -> {
-            // allow login using email or mobile as username
             var userOpt = userRepository.findByEmailOrMobileNumber(usernameOrMobile, usernameOrMobile);
             if (userOpt.isEmpty()) {
-                throw new UsernameNotFoundException("User not found");
+                throw new UsernameNotFoundException("User not found with email or mobile: " + usernameOrMobile);
             }
+
             User u = userOpt.get();
-            UserBuilder builder = org.springframework.security.core.userdetails.User.withUsername(usernameOrMobile)
+            // Always use email (or mobile if null) as username to ensure uniqueness
+            String uniqueUsername = (u.getEmail() != null) ? u.getEmail() : u.getMobileNumber();
+
+            UserBuilder builder = org.springframework.security.core.userdetails.User.withUsername(uniqueUsername)
                     .password(u.getPassword())
                     .disabled(!u.isEnabled())
                     .authorities(u.getRoles().stream().map(Enum::name).toArray(String[]::new));
+
             return builder.build();
         };
     }
@@ -59,7 +66,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "https://your-frontend-app.onrender.com" // your Render URL
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -72,7 +83,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS ENABLE
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -86,6 +97,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/sale-records/**").permitAll()
                         .requestMatchers("/api/buy/**").permitAll()
                         .requestMatchers("/api/profit/**").permitAll()
+                        .requestMatchers("/uploads/**", "/api/upload/**", "/api/files/**", "/api/images/**").permitAll()
+                        .requestMatchers("/images/**", "/static/**", "/resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

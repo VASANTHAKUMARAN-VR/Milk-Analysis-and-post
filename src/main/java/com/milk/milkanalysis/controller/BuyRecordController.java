@@ -27,8 +27,8 @@ public class BuyRecordController {
         return ResponseEntity.ok(service.getUserBuys(userId));
     }
 
-    // ✏️ Update Buy
-    @PatchMapping("/update/{id}/{userId}")
+    // ✏️ Update Buy - PATCH → PUT
+    @PutMapping("/update/{id}/{userId}") // Changed from @PatchMapping
     public ResponseEntity<?> updateBuy(@PathVariable String id,
                                        @PathVariable String userId,
                                        @RequestBody BuyRecord updated) {
