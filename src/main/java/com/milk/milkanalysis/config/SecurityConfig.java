@@ -86,25 +86,37 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/milk/**").permitAll()
-                        .requestMatchers("/api/expense/**").permitAll()
-                        .requestMatchers("/api/cow-purchase/**").permitAll()
-                        .requestMatchers("/api/cow-sale/**").permitAll()
-                        .requestMatchers("/api/cowrequests/**").permitAll()
-                        .requestMatchers("/api/cow-sale-post/**").permitAll()
-                        .requestMatchers("/api/market-post/**").permitAll()
-                        .requestMatchers("/api/sale-records/**").permitAll()
-                        .requestMatchers("/api/buy/**").permitAll()
-                        .requestMatchers("/api/profit/**").permitAll()
-                        .requestMatchers("/uploads/**", "/api/upload/**", "/api/files/**", "/api/images/**").permitAll()
-                        .requestMatchers("/images/**", "/static/**", "/resources/**").permitAll()
+                        // ✅ Public endpoints
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/milk/**",
+                                "/api/expense/**",
+                                "/api/cow-purchase/**",
+                                "/api/cow-sale/**",
+                                "/api/cowrequests/**",
+                                "/api/cow-sale-post/**",
+                                "/api/market-post/**",
+                                "/api/sale-records/**",
+                                "/api/buy/**",
+                                "/api/profit/**",
+                                "/uploads/**",
+                                "/api/upload/**",
+                                "/api/files/**",
+                                "/api/images/**",
+                                "/images/**",
+                                "/static/**",
+                                "/resources/**"
+                        ).permitAll()
+
+                        // 🔒 Secure other APIs
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
+                // ❌ Remove HTTP Basic (this causes 401 for public routes)
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable());
 
         return http.build();
     }
+
 }

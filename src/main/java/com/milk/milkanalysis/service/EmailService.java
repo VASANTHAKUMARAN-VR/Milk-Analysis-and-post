@@ -7,14 +7,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendSimpleMail(String to, String subject, String text) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject(subject);
-        msg.setText(text);
-        mailSender.send(msg);
+    public boolean sendSimpleMail(String to, String subject, String text) {
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom("vasanthakumaransalem1@gmail.com"); // Must match your Gmail account
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(text);
+            mailSender.send(msg);
+
+            System.out.println("✅ Mail sent successfully to: " + to);
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Error sending email: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }
